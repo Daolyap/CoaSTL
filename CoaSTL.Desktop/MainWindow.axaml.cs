@@ -568,7 +568,14 @@ public partial class MainWindow : Window
 
     protected override void OnClosed(EventArgs e)
     {
-        _designer.Dispose();
+        try
+        {
+            _designer.Dispose();
+        }
+        catch
+        {
+            // Ignore disposal exceptions during close
+        }
         base.OnClosed(e);
     }
 }
