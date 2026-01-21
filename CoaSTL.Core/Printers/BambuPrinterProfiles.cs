@@ -130,6 +130,23 @@ public static class BambuPrinterProfiles
     };
 
     /// <summary>
+    /// Bambu Lab P2S profile (newest model with improved features).
+    /// </summary>
+    public static BambuPrinterProfile P2S => new()
+    {
+        ModelName = "P2S",
+        BuildVolumeX = 256,
+        BuildVolumeY = 256,
+        BuildVolumeZ = 256,
+        HasAms = true,
+        AmsSlots = 4,
+        DetailedLayerHeight = 0.08f,
+        StandardLayerHeight = 0.16f,
+        RecommendedSpeed = 300,
+        SupportsHighSpeed = true
+    };
+
+    /// <summary>
     /// Bambu Lab A1 profile.
     /// </summary>
     public static BambuPrinterProfile A1 => new()
@@ -168,7 +185,7 @@ public static class BambuPrinterProfiles
     /// </summary>
     public static IEnumerable<BambuPrinterProfile> All => new[]
     {
-        X1Carbon, X1E, P1P, P1S, A1, A1Mini
+        X1Carbon, X1E, P1P, P1S, P2S, A1, A1Mini
     };
 
     /// <summary>

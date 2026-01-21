@@ -3,15 +3,17 @@ CoaSTL creates custom coaster STL files, with optimisation for 3D printing.
 
 ## Features
 
+- **Desktop Application**: Full-featured GUI with real-time preview and export
 - **Multiple Shapes**: Circle, Square, Hexagon, Octagon, Rounded Square, Custom Polygon (3-12 sides)
 - **Edge Styles**: Flat, Beveled, Rounded, Raised Rim
 - **Image Relief**: Convert images to 3D height maps for embossed/debossed designs
 - **Text Embossing**: Add custom text to your coasters
 - **Export Formats**: Binary STL, ASCII STL, 3MF (with color support)
 - **Material Estimation**: Weight, filament length, cost, and print time calculations
-- **Bambu Labs Optimization**: Pre-configured profiles for X1 Carbon, X1E, P1P, P1S, A1, A1 mini
+- **Bambu Labs Optimization**: Pre-configured profiles for X1 Carbon, X1E, P1P, P1S, **P2S**, A1, A1 mini
 - **Templates**: Built-in design templates and custom template save/load
 - **Batch Processing**: Generate multiple coasters at once
+- **Cross-Platform**: Runs on Windows, macOS, and Linux
 
 ## Quick Start
 
@@ -23,9 +25,32 @@ CoaSTL creates custom coaster STL files, with optimisation for 3D printing.
 dotnet build
 ```
 
+### Run Desktop Application
+```bash
+dotnet run --project CoaSTL.Desktop
+```
+
 ### Run Tests
 ```bash
 dotnet test
+```
+
+## Desktop Application
+
+The desktop application provides a user-friendly interface for designing coasters:
+
+- **Shape Settings**: Select shape, diameter, thickness, height, and edge style
+- **Image Relief**: Load images and convert to 3D relief patterns
+- **Text Embossing**: Add embossed or debossed text with customizable font size and depth
+- **Advanced Options**: Non-slip bottom patterns, drainage grooves
+- **Printer Selection**: Choose target Bambu printer for validation and estimates
+- **Preview**: View mesh statistics including triangle count, dimensions, and filament usage
+- **Export**: Save as STL or 3MF format
+
+### Running the Desktop App
+```bash
+# Run from solution root
+dotnet run --project CoaSTL.Desktop
 ```
 
 ## CLI Usage
@@ -181,14 +206,15 @@ Console.WriteLine($"Generated {result.SuccessCount} coasters");
 
 ## Supported Printers
 
-| Printer | Build Volume | AMS Slots | High Speed |
-|---------|-------------|-----------|------------|
-| X1 Carbon | 256×256×256mm | 16 | ✓ |
-| X1E | 256×256×256mm | 16 | ✓ |
-| P1P | 256×256×256mm | 4 | ✓ |
-| P1S | 256×256×256mm | 4 | ✓ |
-| A1 | 256×256×256mm | 4 | ✓ |
-| A1 mini | 180×180×180mm | 4 | ✓ |
+| Printer | Build Volume | AMS Slots | High Speed | Recommended Speed |
+|---------|-------------|-----------|------------|-------------------|
+| X1 Carbon | 256×256×256mm | 16 | ✓ | 250 mm/s |
+| X1E | 256×256×256mm | 16 | ✓ | 250 mm/s |
+| P1P | 256×256×256mm | 4 | ✓ | 250 mm/s |
+| P1S | 256×256×256mm | 4 | ✓ | 250 mm/s |
+| **P2S** | 256×256×256mm | 4 | ✓ | **300 mm/s** |
+| A1 | 256×256×256mm | 4 | ✓ | 250 mm/s |
+| A1 mini | 180×180×180mm | 4 | ✓ | 200 mm/s |
 
 ## Material Presets
 
@@ -204,8 +230,9 @@ Console.WriteLine($"Generated {result.SuccessCount} coasters");
 
 ## Project Structure
 - **CoaSTL.Core**: Core library with mesh generation, image processing, and STL/3MF export
+- **CoaSTL.Desktop**: Cross-platform desktop application (Avalonia UI)
 - **CoaSTL.Cli**: Command-line interface for generating coasters
-- **CoaSTL.Tests**: 69 unit tests covering all components
+- **CoaSTL.Tests**: 70 unit tests covering all components
 
 ---
 

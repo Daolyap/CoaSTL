@@ -514,11 +514,12 @@ public class BambuPrinterProfilesTests
     {
         var profiles = BambuPrinterProfiles.All.ToList();
 
-        Assert.True(profiles.Count >= 6);
+        Assert.True(profiles.Count >= 7);
         Assert.Contains(profiles, p => p.ModelName == "X1 Carbon");
         Assert.Contains(profiles, p => p.ModelName == "X1E");
         Assert.Contains(profiles, p => p.ModelName == "P1P");
         Assert.Contains(profiles, p => p.ModelName == "P1S");
+        Assert.Contains(profiles, p => p.ModelName == "P2S");
         Assert.Contains(profiles, p => p.ModelName == "A1");
         Assert.Contains(profiles, p => p.ModelName == "A1 mini");
     }
@@ -547,6 +548,21 @@ public class BambuPrinterProfilesTests
         var profile = BambuPrinterProfiles.GetByName("Unknown Printer");
 
         Assert.Null(profile);
+    }
+
+    [Fact]
+    public void P2S_HasCorrectSpecs()
+    {
+        var profile = BambuPrinterProfiles.P2S;
+
+        Assert.Equal("P2S", profile.ModelName);
+        Assert.Equal(256f, profile.BuildVolumeX);
+        Assert.Equal(256f, profile.BuildVolumeY);
+        Assert.Equal(256f, profile.BuildVolumeZ);
+        Assert.True(profile.HasAms);
+        Assert.Equal(4, profile.AmsSlots);
+        Assert.True(profile.SupportsHighSpeed);
+        Assert.Equal(300, profile.RecommendedSpeed);
     }
 
     [Fact]
