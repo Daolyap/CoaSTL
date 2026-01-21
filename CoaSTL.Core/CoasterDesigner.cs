@@ -114,14 +114,9 @@ public sealed class CoasterDesigner : IDisposable
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
 
-        if (resolution.HasValue)
-        {
-            _heightMap = _imageProcessor.GenerateHeightMap(resolution.Value, resolution.Value);
-        }
-        else
-        {
-            _heightMap = _imageProcessor.GenerateHeightMap();
-        }
+        _heightMap = resolution.HasValue
+            ? _imageProcessor.GenerateHeightMap(resolution.Value, resolution.Value)
+            : _imageProcessor.GenerateHeightMap();
     }
 
     /// <summary>
@@ -133,17 +128,11 @@ public sealed class CoasterDesigner : IDisposable
 
         _currentMesh = _meshGenerator.GenerateCoaster(_settings, _heightMap);
 
-        // Add text elements if any
-        if (_advancedSettings.TextElements.Count > 0)
+        // Add text elements if any, using Select for cleaner iteration
+        foreach (var textTriangles in _advancedSettings.TextElements.Select(textElement =>
+            TextGenerator.GenerateText(textElement, _settings.Diameter, _settings.TotalHeight)))
         {
-            foreach (var textElement in _advancedSettings.TextElements)
-            {
-                var textTriangles = TextGenerator.GenerateText(
-                    textElement,
-                    _settings.Diameter,
-                    _settings.TotalHeight);
-                _currentMesh.AddTriangles(textTriangles);
-            }
+            _currentMesh.AddTriangles(textTriangles);
         }
 
         // Add drainage grooves if enabled

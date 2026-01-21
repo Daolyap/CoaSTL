@@ -212,9 +212,11 @@ Console.WriteLine($"Generated {result.SuccessCount} coasters");
 | X1E | 256×256×256mm | 16 | ✓ | 250 mm/s |
 | P1P | 256×256×256mm | 4 | ✓ | 250 mm/s |
 | P1S | 256×256×256mm | 4 | ✓ | 250 mm/s |
-| **P2S** | 256×256×256mm | 4 | ✓ | **300 mm/s** |
+| **P2S**¹ | 256×256×256mm | 4 | ✓ | **300 mm/s** |
 | A1 | 256×256×256mm | 4 | ✓ | 250 mm/s |
 | A1 mini | 180×180×180mm | 4 | ✓ | 200 mm/s |
+
+¹ P2S specifications are based on anticipated product details and may need verification when official specifications are released.
 
 ## Material Presets
 

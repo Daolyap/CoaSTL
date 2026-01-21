@@ -572,9 +572,11 @@ public partial class MainWindow : Window
         {
             _designer.Dispose();
         }
-        catch
+        catch (Exception ex)
         {
-            // Ignore disposal exceptions during close
+            // Log disposal exceptions during window close, since the app is shutting down
+            // and we cannot meaningfully recover from them.
+            Console.Error.WriteLine($"Error disposing designer on window close: {ex.Message}");
         }
         base.OnClosed(e);
     }

@@ -483,8 +483,8 @@ public static class Program
         using var stream = File.OpenRead(filePath);
         using var reader = new BinaryReader(stream);
 
-        // Check header
-        var header = reader.ReadBytes(80);
+        // Check header (skip 80 bytes)
+        _ = reader.ReadBytes(80);
         var triangleCount = reader.ReadUInt32();
 
         Console.WriteLine($"Triangle Count: {triangleCount}");

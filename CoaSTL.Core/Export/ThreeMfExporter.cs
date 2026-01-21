@@ -227,13 +227,10 @@ public sealed class ThreeMfExporter
 
         foreach (var triangle in mesh.Triangles)
         {
-            foreach (var v in new[] { triangle.V1, triangle.V2, triangle.V3 })
+            foreach (var v in new[] { triangle.V1, triangle.V2, triangle.V3 }.Where(v => !vertexIndices.ContainsKey(v)))
             {
-                if (!vertexIndices.ContainsKey(v))
-                {
-                    vertexIndices[v] = vertices.Count;
-                    vertices.Add(v);
-                }
+                vertexIndices[v] = vertices.Count;
+                vertices.Add(v);
             }
         }
 
@@ -259,12 +256,9 @@ public sealed class ThreeMfExporter
 
         foreach (var triangle in mesh.Triangles)
         {
-            foreach (var v in new[] { triangle.V1, triangle.V2, triangle.V3 })
+            foreach (var v in new[] { triangle.V1, triangle.V2, triangle.V3 }.Where(v => !vertexIndices.ContainsKey(v)))
             {
-                if (!vertexIndices.ContainsKey(v))
-                {
-                    vertexIndices[v] = index++;
-                }
+                vertexIndices[v] = index++;
             }
         }
 
@@ -314,5 +308,5 @@ public static class AssemblyInfo
     public static string Version => "1.0.0";
     public static string Name => "CoaSTL";
     public static string Description => "3D Printable Coaster Designer";
-    public static string Copyright => $"Copyright © {DateTime.Now.Year} CoaSTL";
+    public static string Copyright => $"Copyright © {DateTime.UtcNow.Year} CoaSTL";
 }

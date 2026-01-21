@@ -150,7 +150,7 @@ public sealed class BatchProcessor
                 using var designer = new CoasterDesigner();
                 designer.Settings = settingsList[i];
 
-                var fileName = string.Format(config.FileNamePattern, i + 1, settingsList[i].Shape);
+                var fileName = string.Format(config.FileNamePattern, i + 1);
                 var filePath = Path.Combine(config.OutputDirectory, fileName);
 
                 var validation = designer.GenerateAndExport(filePath, config.StlOptions);
@@ -205,7 +205,7 @@ public sealed class BatchProcessor
     {
         var settingsList = new List<CoasterSettings>();
 
-        foreach (var text in textValues)
+        foreach (var _ in textValues)
         {
             var settings = new CoasterSettings
             {
@@ -254,8 +254,16 @@ public sealed class BatchProcessor
 /// </summary>
 public sealed class MaterialCalculator
 {
-    // Shape efficiency constant (π/4 for circular shapes)
-    private const float CircleShapeEfficiency = 0.785f;
+    // Shape efficiency factors for different coaster shapes
+    private static readonly Dictionary<CoasterShape, float> ShapeEfficiencyFactors = new()
+    {
+        [CoasterShape.Circle] = 0.785f,           // π/4 for circular shapes
+        [CoasterShape.Square] = 1.0f,             // 100% of bounding box
+        [CoasterShape.RoundedSquare] = 0.95f,     // Square with rounded corners
+        [CoasterShape.Hexagon] = 0.866f,          // √3/2 for regular hexagon
+        [CoasterShape.Octagon] = 0.828f,          // Regular octagon efficiency
+        [CoasterShape.CustomPolygon] = 0.8f       // Approximate for custom shapes
+    };
 
     // Percentage of volume that is solid walls/surfaces
     private const float SolidWallsPercentage = 0.3f;
@@ -266,7 +274,7 @@ public sealed class MaterialCalculator
     /// <summary>
     /// Calculates material estimates for a coaster.
     /// </summary>
-    public MaterialEstimate Calculate(Mesh mesh, Material material, float infillDensity = 0.2f)
+    public MaterialEstimate Calculate(Mesh mesh, Material material, float infillDensity = 0.2f, CoasterShape shape = CoasterShape.Circle)
     {
         var (min, max) = mesh.GetBoundingBox();
         var size = max - min;
@@ -275,10 +283,12 @@ public sealed class MaterialCalculator
         // Real volume would require mesh volume calculation
         var boundingVolume = size.X * size.Y * size.Z;
 
+        // Get shape-specific efficiency factor
+        var shapeEfficiency = ShapeEfficiencyFactors.GetValueOrDefault(shape, 0.8f);
+
         // Estimate actual volume (coaster shape + infill)
-        // Circular coaster: ~78.5% of bounding box, then * infill
-        var solidVolume = boundingVolume * CircleShapeEfficiency * SolidWallsPercentage;
-        var infillVolume = boundingVolume * CircleShapeEfficiency * InfillPercentage * infillDensity;
+        var solidVolume = boundingVolume * shapeEfficiency * SolidWallsPercentage;
+        var infillVolume = boundingVolume * shapeEfficiency * InfillPercentage * infillDensity;
         var totalVolumeMm3 = solidVolume + infillVolume;
         var volumeCm3 = totalVolumeMm3 / 1000f;
 

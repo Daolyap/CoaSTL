@@ -101,7 +101,6 @@ public sealed class MeshGenerator
 
         // Create a grid of points over the profile
         var gridResolution = Math.Max(mapWidth, mapHeight);
-        var gridPoints = new List<Vector3>();
         var cellSizeX = width / gridResolution;
         var cellSizeY = height / gridResolution;
 
@@ -131,15 +130,9 @@ public sealed class MeshGenerator
 
                 var z = settings.BaseThickness + reliefHeight;
 
-                // Check if point is inside profile
-                if (IsPointInProfile(x, y, profile))
-                {
-                    vertices[ix, iy] = new Vector3(x, y, z);
-                }
-                else
-                {
-                    vertices[ix, iy] = new Vector3(x, y, settings.BaseThickness);
-                }
+                // Check if point is inside profile, using ternary for clarity
+                var vertexHeight = IsPointInProfile(x, y, profile) ? z : settings.BaseThickness;
+                vertices[ix, iy] = new Vector3(x, y, vertexHeight);
             }
         }
 
@@ -153,13 +146,18 @@ public sealed class MeshGenerator
                 var v01 = vertices[ix, iy + 1];
                 var v11 = vertices[ix + 1, iy + 1];
 
-                // Only add triangles if all vertices are inside the profile
-                if (IsPointInProfile(v00.X, v00.Y, profile) &&
-                    IsPointInProfile(v10.X, v10.Y, profile) &&
-                    IsPointInProfile(v01.X, v01.Y, profile) &&
-                    IsPointInProfile(v11.X, v11.Y, profile))
+                // Add triangles based on centroid inclusion to avoid gaps at boundaries
+                var tri1CenterX = (v00.X + v10.X + v11.X) / 3f;
+                var tri1CenterY = (v00.Y + v10.Y + v11.Y) / 3f;
+                if (IsPointInProfile(tri1CenterX, tri1CenterY, profile))
                 {
                     mesh.AddTriangle(v00, v10, v11);
+                }
+
+                var tri2CenterX = (v00.X + v11.X + v01.X) / 3f;
+                var tri2CenterY = (v00.Y + v11.Y + v01.Y) / 3f;
+                if (IsPointInProfile(tri2CenterX, tri2CenterY, profile))
+                {
                     mesh.AddTriangle(v00, v11, v01);
                 }
             }
@@ -208,12 +206,8 @@ public sealed class MeshGenerator
                 h2 = settings.ReliefDepth - h2;
             }
 
-            var z1 = settings.BaseThickness + h1;
-            var z2 = settings.BaseThickness + h2;
-
-            // Triangle fan from center at average height
-            var centerX = (p1.X + p2.X) / 2;
-            var centerY = (p1.Y + p2.Y) / 2;
+            // Note: z1, z2 and centerX, centerY were computed but not used in the original implementation.
+            // Edge surface generation is handled by the main height map surface triangulation.
         }
     }
 

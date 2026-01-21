@@ -130,7 +130,9 @@ public static class BambuPrinterProfiles
     };
 
     /// <summary>
-    /// Bambu Lab P2S profile (newest model with improved features).
+    /// Bambu Lab P2S profile.
+    /// Note: P2S specifications are based on anticipated product details and may need updating
+    /// when official specifications are released. Verify before production use.
     /// </summary>
     public static BambuPrinterProfile P2S => new()
     {
