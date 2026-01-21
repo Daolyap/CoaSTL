@@ -150,6 +150,11 @@ public sealed class AdvancedCoasterSettings
     public int DrainageGrooveCount { get; set; } = 3;
 
     /// <summary>
+    /// Drainage groove width in mm.
+    /// </summary>
+    public float DrainageGrooveWidth { get; set; } = 1.5f;
+
+    /// <summary>
     /// Drainage groove depth in mm.
     /// </summary>
     public float DrainageGrooveDepth { get; set; } = 0.5f;

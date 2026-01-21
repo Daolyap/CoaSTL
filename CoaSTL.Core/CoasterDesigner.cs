@@ -153,7 +153,7 @@ public sealed class CoasterDesigner : IDisposable
             var grooves = PatternGenerator.GenerateDrainageGrooves(
                 profile,
                 _advancedSettings.DrainageGrooveCount,
-                1.5f, // groove width
+                _advancedSettings.DrainageGrooveWidth > 0 ? _advancedSettings.DrainageGrooveWidth : 1.5f,
                 _advancedSettings.DrainageGrooveDepth,
                 _settings.TotalHeight);
             _currentMesh.AddTriangles(grooves);

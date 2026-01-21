@@ -254,6 +254,15 @@ public sealed class BatchProcessor
 /// </summary>
 public sealed class MaterialCalculator
 {
+    // Shape efficiency constant (π/4 for circular shapes)
+    private const float CircleShapeEfficiency = 0.785f;
+
+    // Percentage of volume that is solid walls/surfaces
+    private const float SolidWallsPercentage = 0.3f;
+
+    // Percentage of volume that is infill
+    private const float InfillPercentage = 0.7f;
+
     /// <summary>
     /// Calculates material estimates for a coaster.
     /// </summary>
@@ -268,9 +277,8 @@ public sealed class MaterialCalculator
 
         // Estimate actual volume (coaster shape + infill)
         // Circular coaster: ~78.5% of bounding box, then * infill
-        var shapeEfficiency = 0.785f; // π/4 for circles
-        var solidVolume = boundingVolume * shapeEfficiency * 0.3f; // 30% solid walls/surfaces
-        var infillVolume = boundingVolume * shapeEfficiency * 0.7f * infillDensity;
+        var solidVolume = boundingVolume * CircleShapeEfficiency * SolidWallsPercentage;
+        var infillVolume = boundingVolume * CircleShapeEfficiency * InfillPercentage * infillDensity;
         var totalVolumeMm3 = solidVolume + infillVolume;
         var volumeCm3 = totalVolumeMm3 / 1000f;
 

@@ -892,7 +892,7 @@ public class MaterialCalculatorTests
     public void Calculate_ReturnsEstimate()
     {
         var calculator = new MaterialCalculator();
-        var mesh = CreateSimpleMesh();
+        var mesh = CreateCoasterMesh();
         var material = MaterialPresets.PLA;
 
         var estimate = calculator.Calculate(mesh, material);
@@ -901,7 +901,7 @@ public class MaterialCalculatorTests
         Assert.True(estimate.WeightGrams >= 0);
     }
 
-    private static Mesh CreateSimpleMesh()
+    private static Mesh CreateCoasterMesh()
     {
         var generator = new MeshGenerator();
         var settings = new CoasterSettings
