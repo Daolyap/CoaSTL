@@ -1,6 +1,90 @@
 # CoaSTL
 CoaSTL creates custom coaster STL files, with optimisation for 3D printing.
 
+## Quick Start
+
+### Prerequisites
+- .NET 8.0 SDK or later
+
+### Build
+```bash
+dotnet build
+```
+
+### Run Tests
+```bash
+dotnet test
+```
+
+### CLI Usage
+```bash
+# Show help
+dotnet run --project CoaSTL.Cli -- help
+
+# Generate a circle coaster
+dotnet run --project CoaSTL.Cli -- generate -s Circle -d 100 -o mycoaster.stl
+
+# Generate a hexagon coaster
+dotnet run --project CoaSTL.Cli -- generate -s Hexagon -d 90
+
+# List available Bambu printer profiles
+dotnet run --project CoaSTL.Cli -- printers
+
+# List available shapes
+dotnet run --project CoaSTL.Cli -- shapes
+```
+
+### CLI Options
+| Option | Description |
+|--------|-------------|
+| `-o, --output <file>` | Output STL file path (default: coaster.stl) |
+| `-s, --shape <shape>` | Shape: Circle, Square, Hexagon, Octagon, RoundedSquare, CustomPolygon |
+| `-d, --diameter <mm>` | Diameter/width (70-150mm, default: 100) |
+| `-t, --thickness <mm>` | Base thickness (2-8mm, default: 4) |
+| `-h, --height <mm>` | Total height (3-15mm, default: 6) |
+| `-e, --edge <style>` | Edge: Flat, Beveled, Rounded, RaisedRim |
+| `-i, --image <file>` | Image for height map relief |
+| `-r, --relief <mm>` | Relief depth (0.5-5mm, default: 1.5) |
+| `--invert` | Invert relief (debossed) |
+| `--nonslip` | Add non-slip bottom pattern |
+| `--ascii` | Export as ASCII STL |
+| `-p, --printer <name>` | Validate for Bambu printer |
+
+### Library Usage
+```csharp
+using CoaSTL.Core;
+using CoaSTL.Core.Models;
+using CoaSTL.Core.Export;
+
+// Create a coaster designer
+using var designer = new CoasterDesigner();
+
+// Configure settings
+designer.Settings = new CoasterSettings
+{
+    Shape = CoasterShape.Circle,
+    Diameter = 100f,
+    BaseThickness = 4f,
+    TotalHeight = 6f
+};
+
+// Generate mesh and export
+var result = designer.GenerateAndExport("coaster.stl", new StlExportOptions
+{
+    Format = StlFormat.Binary,
+    ModelName = "MyCoaster"
+});
+
+Console.WriteLine($"Generated {result.TriangleCount} triangles");
+```
+
+## Project Structure
+- **CoaSTL.Core**: Core library with mesh generation, image processing, and STL export
+- **CoaSTL.Cli**: Command-line interface for generating coasters
+- **CoaSTL.Tests**: Unit tests
+
+---
+
 # 3D Printable Coaster Designer - Requirements Specification
 
 ## Project Overview
