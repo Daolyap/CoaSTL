@@ -1,0 +1,237 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="800"
+        x:Class="CoaSTL.Desktop.MainWindow"
+        Title="CoaSTL - 3D Printable Coaster Designer"
+        Width="1200" Height="800"
+        MinWidth="900" MinHeight="600"
+        WindowStartupLocation="CenterScreen">
+
+    <Grid RowDefinitions="Auto,*,Auto">
+        <!-- Header / Toolbar -->
+        <Border Grid.Row="0" Background="{DynamicResource SystemAccentColor}" Padding="16,12">
+            <Grid ColumnDefinitions="Auto,*,Auto">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <TextBlock Text="🎯 CoaSTL" FontSize="24" FontWeight="Bold" Foreground="White"/>
+                    <TextBlock Text="3D Printable Coaster Designer" VerticalAlignment="Center" Foreground="White" Opacity="0.8"/>
+                </StackPanel>
+                
+                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8">
+                    <Button x:Name="NewButton" Content="📄 New" Classes="toolbar"/>
+                    <Button x:Name="OpenTemplateButton" Content="📂 Open Template" Classes="toolbar"/>
+                    <Button x:Name="SaveTemplateButton" Content="💾 Save Template" Classes="toolbar"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Main Content -->
+        <Grid Grid.Row="1" ColumnDefinitions="350,*" Margin="16">
+            <!-- Left Panel - Settings -->
+            <ScrollViewer Grid.Column="0" Margin="0,0,8,0">
+                <StackPanel Spacing="16">
+                    <!-- Shape Settings -->
+                    <Border Classes="card">
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="Shape Settings" FontWeight="SemiBold" FontSize="16"/>
+                            
+                            <Grid ColumnDefinitions="100,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto" Margin="0,0,0,0">
+                                <TextBlock Text="Shape:" VerticalAlignment="Center"/>
+                                <ComboBox x:Name="ShapeComboBox" Grid.Column="1" SelectedIndex="0">
+                                    <ComboBoxItem Content="Circle"/>
+                                    <ComboBoxItem Content="Square"/>
+                                    <ComboBoxItem Content="Hexagon"/>
+                                    <ComboBoxItem Content="Octagon"/>
+                                    <ComboBoxItem Content="Rounded Square"/>
+                                    <ComboBoxItem Content="Custom Polygon"/>
+                                </ComboBox>
+                                
+                                <TextBlock Grid.Row="1" Text="Diameter:" VerticalAlignment="Center" Margin="0,8,0,0"/>
+                                <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" Spacing="8" Margin="0,8,0,0">
+                                    <Slider x:Name="DiameterSlider" Minimum="70" Maximum="150" Value="100" Width="180"/>
+                                    <TextBlock x:Name="DiameterText" Text="100 mm" VerticalAlignment="Center" Width="60"/>
+                                </StackPanel>
+                                
+                                <TextBlock Grid.Row="2" Text="Thickness:" VerticalAlignment="Center"/>
+                                <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                                    <Slider x:Name="ThicknessSlider" Minimum="2" Maximum="8" Value="4" Width="180"/>
+                                    <TextBlock x:Name="ThicknessText" Text="4 mm" VerticalAlignment="Center" Width="60"/>
+                                </StackPanel>
+                                
+                                <TextBlock Grid.Row="3" Text="Total Height:" VerticalAlignment="Center"/>
+                                <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                                    <Slider x:Name="HeightSlider" Minimum="3" Maximum="15" Value="6" Width="180"/>
+                                    <TextBlock x:Name="HeightText" Text="6 mm" VerticalAlignment="Center" Width="60"/>
+                                </StackPanel>
+                                
+                                <TextBlock Grid.Row="4" Text="Edge Style:" VerticalAlignment="Center"/>
+                                <ComboBox x:Name="EdgeStyleComboBox" Grid.Row="4" Grid.Column="1" SelectedIndex="0">
+                                    <ComboBoxItem Content="Flat"/>
+                                    <ComboBoxItem Content="Beveled"/>
+                                    <ComboBoxItem Content="Rounded"/>
+                                    <ComboBoxItem Content="Raised Rim"/>
+                                </ComboBox>
+                                
+                                <TextBlock Grid.Row="5" Text="Polygon Sides:" VerticalAlignment="Center" x:Name="PolygonSidesLabel" IsVisible="False"/>
+                                <StackPanel Grid.Row="5" Grid.Column="1" Orientation="Horizontal" Spacing="8" x:Name="PolygonSidesPanel" IsVisible="False">
+                                    <Slider x:Name="PolygonSidesSlider" Minimum="3" Maximum="12" Value="6" Width="180"/>
+                                    <TextBlock x:Name="PolygonSidesText" Text="6" VerticalAlignment="Center" Width="60"/>
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Image/Relief Settings -->
+                    <Border Classes="card">
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="Image Relief" FontWeight="SemiBold" FontSize="16"/>
+                            
+                            <Button x:Name="LoadImageButton" Content="📷 Load Image..." HorizontalAlignment="Stretch"/>
+                            <TextBlock x:Name="ImageStatusText" Text="No image loaded" Opacity="0.6"/>
+                            
+                            <Grid ColumnDefinitions="100,*" RowDefinitions="Auto,Auto" Margin="0,8,0,0">
+                                <TextBlock Text="Relief Depth:" VerticalAlignment="Center"/>
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                                    <Slider x:Name="ReliefDepthSlider" Minimum="0.5" Maximum="5" Value="1.5" Width="180"/>
+                                    <TextBlock x:Name="ReliefDepthText" Text="1.5 mm" VerticalAlignment="Center" Width="60"/>
+                                </StackPanel>
+                                
+                                <TextBlock Grid.Row="1" Text="Invert:" VerticalAlignment="Center" Margin="0,8,0,0"/>
+                                <CheckBox x:Name="InvertReliefCheckBox" Grid.Row="1" Grid.Column="1" Content="Invert relief (debossed)" Margin="0,8,0,0"/>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Text Settings -->
+                    <Border Classes="card">
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="Text Embossing" FontWeight="SemiBold" FontSize="16"/>
+                            
+                            <TextBox x:Name="TextInputBox" Watermark="Enter text to emboss..." />
+                            
+                            <Grid ColumnDefinitions="100,*" RowDefinitions="Auto,Auto,Auto" Margin="0,0,0,0">
+                                <TextBlock Text="Font Size:" VerticalAlignment="Center"/>
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                                    <Slider x:Name="FontSizeSlider" Minimum="4" Maximum="20" Value="8" Width="180"/>
+                                    <TextBlock x:Name="FontSizeText" Text="8 mm" VerticalAlignment="Center" Width="60"/>
+                                </StackPanel>
+                                
+                                <TextBlock Grid.Row="1" Text="Text Depth:" VerticalAlignment="Center" Margin="0,8,0,0"/>
+                                <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" Spacing="8" Margin="0,8,0,0">
+                                    <Slider x:Name="TextDepthSlider" Minimum="0.5" Maximum="3" Value="1" Width="180"/>
+                                    <TextBlock x:Name="TextDepthText" Text="1 mm" VerticalAlignment="Center" Width="60"/>
+                                </StackPanel>
+                                
+                                <TextBlock Grid.Row="2" Text="Style:" VerticalAlignment="Center" Margin="0,8,0,0"/>
+                                <CheckBox x:Name="EmbossedCheckBox" Grid.Row="2" Grid.Column="1" Content="Embossed (raised)" IsChecked="True" Margin="0,8,0,0"/>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Advanced Options -->
+                    <Border Classes="card">
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="Advanced Options" FontWeight="SemiBold" FontSize="16"/>
+                            
+                            <CheckBox x:Name="NonSlipCheckBox" Content="Add non-slip bottom pattern"/>
+                            <CheckBox x:Name="DrainageCheckBox" Content="Add drainage grooves"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Printer Selection -->
+                    <Border Classes="card">
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="Target Printer" FontWeight="SemiBold" FontSize="16"/>
+                            
+                            <ComboBox x:Name="PrinterComboBox" SelectedIndex="0">
+                                <ComboBoxItem Content="X1 Carbon"/>
+                                <ComboBoxItem Content="X1E"/>
+                                <ComboBoxItem Content="P1P"/>
+                                <ComboBoxItem Content="P1S"/>
+                                <ComboBoxItem Content="P2S"/>
+                                <ComboBoxItem Content="A1"/>
+                                <ComboBoxItem Content="A1 mini"/>
+                            </ComboBox>
+                            
+                            <TextBlock x:Name="PrinterInfoText" Text="Build Volume: 256×256×256 mm" Opacity="0.6"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
+
+            <!-- Right Panel - Preview and Export -->
+            <Grid Grid.Column="1" RowDefinitions="*,Auto" Margin="8,0,0,0">
+                <!-- Preview Area -->
+                <Border Classes="card" Grid.Row="0">
+                    <Grid RowDefinitions="Auto,*">
+                        <TextBlock Text="Preview" FontWeight="SemiBold" FontSize="16" Margin="0,0,0,8"/>
+                        
+                        <Border Grid.Row="1" Background="#1a1a1a" CornerRadius="8">
+                            <Grid>
+                                <!-- Placeholder for 3D preview -->
+                                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="16">
+                                    <TextBlock Text="🎨" FontSize="64" HorizontalAlignment="Center"/>
+                                    <TextBlock x:Name="PreviewInfoText" Text="Click 'Generate Preview' to see your coaster" 
+                                               HorizontalAlignment="Center" Foreground="White" Opacity="0.7"/>
+                                </StackPanel>
+                                
+                                <!-- Preview Stats Overlay -->
+                                <Border x:Name="PreviewStatsPanel" IsVisible="False" 
+                                        Background="#80000000" Padding="12" CornerRadius="8" 
+                                        HorizontalAlignment="Left" VerticalAlignment="Top" Margin="8">
+                                    <StackPanel Spacing="4">
+                                        <TextBlock x:Name="TriangleCountText" Text="Triangles: -" Foreground="White"/>
+                                        <TextBlock x:Name="DimensionsText" Text="Dimensions: -" Foreground="White"/>
+                                        <TextBlock x:Name="FilamentText" Text="Filament: -" Foreground="White"/>
+                                        <TextBlock x:Name="PrintTimeText" Text="Print Time: -" Foreground="White"/>
+                                    </StackPanel>
+                                </Border>
+                            </Grid>
+                        </Border>
+                    </Grid>
+                </Border>
+
+                <!-- Action Buttons -->
+                <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8" Margin="0,16,0,0">
+                    <Button x:Name="GeneratePreviewButton" Content="🔄 Generate Preview" Width="160"/>
+                    <Button x:Name="ExportStlButton" Content="📤 Export STL" Width="120" Classes="accent"/>
+                    <Button x:Name="Export3MfButton" Content="📤 Export 3MF" Width="120" Classes="accent"/>
+                </StackPanel>
+            </Grid>
+        </Grid>
+
+        <!-- Status Bar -->
+        <Border Grid.Row="2" Background="{DynamicResource SystemAccentColorDark1}" Padding="16,8">
+            <Grid ColumnDefinitions="*,Auto">
+                <TextBlock x:Name="StatusText" Text="Ready" Foreground="White" VerticalAlignment="Center"/>
+                <TextBlock Grid.Column="1" Text="CoaSTL v1.0.0" Foreground="White" Opacity="0.6" VerticalAlignment="Center"/>
+            </Grid>
+        </Border>
+    </Grid>
+
+    <Window.Styles>
+        <Style Selector="Border.card">
+            <Setter Property="Background" Value="{DynamicResource SystemRegionBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource SystemBaseLowColor}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="16"/>
+        </Style>
+        
+        <Style Selector="Button.toolbar">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+        </Style>
+        
+        <Style Selector="Button.toolbar:pointerover">
+            <Setter Property="Background" Value="#40FFFFFF"/>
+        </Style>
+        
+        <Style Selector="Button.accent">
+            <Setter Property="Background" Value="{DynamicResource SystemAccentColor}"/>
+            <Setter Property="Foreground" Value="White"/>
+        </Style>
+    </Window.Styles>
+</Window>
