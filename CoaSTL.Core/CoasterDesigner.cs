@@ -14,7 +14,10 @@ public sealed class CoasterDesigner : IDisposable
     private readonly MeshGenerator _meshGenerator = new();
     private readonly ImageProcessor _imageProcessor = new();
     private readonly StlExporter _stlExporter = new();
+    private readonly ThreeMfExporter _threeMfExporter = new();
+    private readonly MaterialCalculator _materialCalculator = new();
     private CoasterSettings _settings = new();
+    private AdvancedCoasterSettings _advancedSettings = new();
     private float[,]? _heightMap;
     private Mesh? _currentMesh;
     private bool _disposed;
@@ -26,6 +29,15 @@ public sealed class CoasterDesigner : IDisposable
     {
         get => _settings;
         set => _settings = value ?? new CoasterSettings();
+    }
+
+    /// <summary>
+    /// Gets or sets the advanced coaster settings.
+    /// </summary>
+    public AdvancedCoasterSettings AdvancedSettings
+    {
+        get => _advancedSettings;
+        set => _advancedSettings = value ?? new AdvancedCoasterSettings();
     }
 
     /// <summary>
@@ -120,6 +132,33 @@ public sealed class CoasterDesigner : IDisposable
         ObjectDisposedException.ThrowIf(_disposed, this);
 
         _currentMesh = _meshGenerator.GenerateCoaster(_settings, _heightMap);
+
+        // Add text elements if any
+        if (_advancedSettings.TextElements.Count > 0)
+        {
+            foreach (var textElement in _advancedSettings.TextElements)
+            {
+                var textTriangles = TextGenerator.GenerateText(
+                    textElement,
+                    _settings.Diameter,
+                    _settings.TotalHeight);
+                _currentMesh.AddTriangles(textTriangles);
+            }
+        }
+
+        // Add drainage grooves if enabled
+        if (_advancedSettings.AddDrainageGrooves)
+        {
+            var profile = ShapeGenerator.GenerateProfile(_settings);
+            var grooves = PatternGenerator.GenerateDrainageGrooves(
+                profile,
+                _advancedSettings.DrainageGrooveCount,
+                1.5f, // groove width
+                _advancedSettings.DrainageGrooveDepth,
+                _settings.TotalHeight);
+            _currentMesh.AddTriangles(grooves);
+        }
+
         return _currentMesh;
     }
 
@@ -173,6 +212,32 @@ public sealed class CoasterDesigner : IDisposable
     }
 
     /// <summary>
+    /// Exports the current mesh to 3MF format.
+    /// </summary>
+    public void ExportTo3Mf(string filePath, ThreeMfExportOptions? options = null)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+
+        if (_currentMesh == null)
+            throw new InvalidOperationException("No mesh generated. Call GenerateMesh first.");
+
+        _threeMfExporter.Export(_currentMesh, filePath, options);
+    }
+
+    /// <summary>
+    /// Exports the current mesh to 3MF format to a stream.
+    /// </summary>
+    public void ExportTo3Mf(Stream stream, ThreeMfExportOptions? options = null)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+
+        if (_currentMesh == null)
+            throw new InvalidOperationException("No mesh generated. Call GenerateMesh first.");
+
+        _threeMfExporter.Export(_currentMesh, stream, options);
+    }
+
+    /// <summary>
     /// Generates and exports a coaster in one operation.
     /// </summary>
     public MeshValidationResult GenerateAndExport(string outputPath, StlExportOptions? options = null)
@@ -214,6 +279,20 @@ public sealed class CoasterDesigner : IDisposable
     }
 
     /// <summary>
+    /// Calculates detailed material estimates.
+    /// </summary>
+    public MaterialEstimate CalculateMaterialEstimate(Material? material = null, float infillDensity = 0.2f)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+
+        if (_currentMesh == null)
+            throw new InvalidOperationException("No mesh generated. Call GenerateMesh first.");
+
+        material ??= MaterialPresets.PLA;
+        return _materialCalculator.Calculate(_currentMesh, material, infillDensity);
+    }
+
+    /// <summary>
     /// Estimates print time in minutes based on printer profile.
     /// </summary>
     public int EstimatePrintTime(BambuPrinterProfile profile)
@@ -243,8 +322,72 @@ public sealed class CoasterDesigner : IDisposable
         ObjectDisposedException.ThrowIf(_disposed, this);
 
         _settings = new CoasterSettings();
+        _advancedSettings = new AdvancedCoasterSettings();
         _heightMap = null;
         _currentMesh = null;
+    }
+
+    /// <summary>
+    /// Adds text to the coaster design.
+    /// </summary>
+    public void AddText(TextElement textElement)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        _advancedSettings.TextElements.Add(textElement);
+    }
+
+    /// <summary>
+    /// Clears all text elements.
+    /// </summary>
+    public void ClearText()
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        _advancedSettings.TextElements.Clear();
+    }
+
+    /// <summary>
+    /// Loads settings from a template.
+    /// </summary>
+    public void LoadFromTemplate(CoasterTemplate template)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+
+        _settings = template.Settings;
+        _advancedSettings = template.AdvancedSettings;
+
+        // Load image if specified
+        if (!string.IsNullOrEmpty(template.ImagePath) && File.Exists(template.ImagePath))
+        {
+            LoadImage(template.ImagePath);
+            ProcessImage(grayscale: true);
+            GenerateHeightMap();
+        }
+        else if (!string.IsNullOrEmpty(template.ImageData))
+        {
+            var imageBytes = Convert.FromBase64String(template.ImageData);
+            using var stream = new MemoryStream(imageBytes);
+            LoadImage(stream);
+            ProcessImage(grayscale: true);
+            GenerateHeightMap();
+        }
+    }
+
+    /// <summary>
+    /// Saves current design to a template.
+    /// </summary>
+    public CoasterTemplate SaveToTemplate(string name, string? description = null)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+
+        return new CoasterTemplate
+        {
+            Name = name,
+            Description = description ?? "",
+            Settings = _settings,
+            AdvancedSettings = _advancedSettings,
+            CreatedAt = DateTime.UtcNow,
+            ModifiedAt = DateTime.UtcNow
+        };
     }
 
     public void Dispose()

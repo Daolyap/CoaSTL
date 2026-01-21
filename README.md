@@ -1,6 +1,18 @@
 # CoaSTL
 CoaSTL creates custom coaster STL files, with optimisation for 3D printing.
 
+## Features
+
+- **Multiple Shapes**: Circle, Square, Hexagon, Octagon, Rounded Square, Custom Polygon (3-12 sides)
+- **Edge Styles**: Flat, Beveled, Rounded, Raised Rim
+- **Image Relief**: Convert images to 3D height maps for embossed/debossed designs
+- **Text Embossing**: Add custom text to your coasters
+- **Export Formats**: Binary STL, ASCII STL, 3MF (with color support)
+- **Material Estimation**: Weight, filament length, cost, and print time calculations
+- **Bambu Labs Optimization**: Pre-configured profiles for X1 Carbon, X1E, P1P, P1S, A1, A1 mini
+- **Templates**: Built-in design templates and custom template save/load
+- **Batch Processing**: Generate multiple coasters at once
+
 ## Quick Start
 
 ### Prerequisites
@@ -16,41 +28,79 @@ dotnet build
 dotnet test
 ```
 
-### CLI Usage
+## CLI Usage
+
+### Basic Commands
 ```bash
 # Show help
 dotnet run --project CoaSTL.Cli -- help
 
+# Show version
+dotnet run --project CoaSTL.Cli -- version
+
 # Generate a circle coaster
 dotnet run --project CoaSTL.Cli -- generate -s Circle -d 100 -o mycoaster.stl
 
-# Generate a hexagon coaster
-dotnet run --project CoaSTL.Cli -- generate -s Hexagon -d 90
+# Generate using a template
+dotnet run --project CoaSTL.Cli -- generate --template "Minimalist"
 
-# List available Bambu printer profiles
-dotnet run --project CoaSTL.Cli -- printers
-
-# List available shapes
-dotnet run --project CoaSTL.Cli -- shapes
+# List available commands
+dotnet run --project CoaSTL.Cli -- printers    # Bambu printer profiles
+dotnet run --project CoaSTL.Cli -- shapes      # Available shapes
+dotnet run --project CoaSTL.Cli -- materials   # Material presets
+dotnet run --project CoaSTL.Cli -- templates   # Built-in templates
 ```
 
-### CLI Options
+### Generate Options
 | Option | Description |
 |--------|-------------|
-| `-o, --output <file>` | Output STL file path (default: coaster.stl) |
+| `-o, --output <file>` | Output file path (default: coaster.stl) |
 | `-s, --shape <shape>` | Shape: Circle, Square, Hexagon, Octagon, RoundedSquare, CustomPolygon |
 | `-d, --diameter <mm>` | Diameter/width (70-150mm, default: 100) |
 | `-t, --thickness <mm>` | Base thickness (2-8mm, default: 4) |
-| `-h, --height <mm>` | Total height (3-15mm, default: 6) |
+| `--total-height <mm>` | Total height (3-15mm, default: 6) |
 | `-e, --edge <style>` | Edge: Flat, Beveled, Rounded, RaisedRim |
 | `-i, --image <file>` | Image for height map relief |
 | `-r, --relief <mm>` | Relief depth (0.5-5mm, default: 1.5) |
 | `--invert` | Invert relief (debossed) |
 | `--nonslip` | Add non-slip bottom pattern |
-| `--ascii` | Export as ASCII STL |
+| `--ascii` | Export as ASCII STL (default: binary) |
+| `--3mf` | Export as 3MF format |
+| `--corners <mm>` | Corner radius for RoundedSquare |
+| `--sides <n>` | Number of sides for CustomPolygon (3-12) |
 | `-p, --printer <name>` | Validate for Bambu printer |
+| `-m, --material <name>` | Material for cost estimation |
+| `--text <text>` | Add embossed text |
+| `--drainage` | Add drainage grooves |
+| `--template <name>` | Use a built-in or custom template |
 
-### Library Usage
+### Batch Operations
+```bash
+# Generate a set of 6 hexagon coasters
+dotnet run --project CoaSTL.Cli -- batch -c 6 -s Hexagon -o ./coasters/
+```
+
+### Examples
+```bash
+# Circle with image relief
+dotnet run --project CoaSTL.Cli -- generate -s Circle -i logo.png -r 2.0
+
+# Hexagon with text and 3MF export
+dotnet run --project CoaSTL.Cli -- generate -s Hexagon --text "HELLO" --3mf
+
+# Rounded square optimized for A1 mini
+dotnet run --project CoaSTL.Cli -- generate -s RoundedSquare --corners 15 -p "A1 mini"
+
+# Using PETG material estimation
+dotnet run --project CoaSTL.Cli -- generate -s Circle -m PETG
+
+# Validate existing STL
+dotnet run --project CoaSTL.Cli -- validate coaster.stl
+```
+
+## Library Usage
+
+### Basic Usage
 ```csharp
 using CoaSTL.Core;
 using CoaSTL.Core.Models;
@@ -78,10 +128,84 @@ var result = designer.GenerateAndExport("coaster.stl", new StlExportOptions
 Console.WriteLine($"Generated {result.TriangleCount} triangles");
 ```
 
+### Advanced Features
+```csharp
+// Add embossed text
+designer.AddText(new TextElement
+{
+    Text = "HELLO",
+    FontSize = 8f,
+    Depth = 1f,
+    Embossed = true,
+    Alignment = TextAlignment.Center
+});
+
+// Export to 3MF with color
+designer.GenerateMesh();
+designer.ExportTo3Mf("coaster.3mf", new ThreeMfExportOptions
+{
+    ModelName = "MyCoaster",
+    IncludeColorInfo = true,
+    PrimaryColor = "#4CAF50"
+});
+
+// Calculate material costs
+var estimate = designer.CalculateMaterialEstimate(MaterialPresets.PETG);
+Console.WriteLine($"Cost: ${estimate.EstimatedCost:F2}");
+Console.WriteLine($"Print Time: ~{estimate.PrintTimeMinutes} min");
+```
+
+### Using Templates
+```csharp
+// Load from built-in template
+var template = BuiltInTemplates.Hexagonal;
+designer.LoadFromTemplate(template);
+
+// Save current design as template
+var myTemplate = designer.SaveToTemplate("My Design", "A custom coaster");
+TemplateManager.SaveTemplate(myTemplate, "my_design.json");
+```
+
+### Batch Processing
+```csharp
+var processor = new BatchProcessor();
+var config = new BatchGenerationConfig
+{
+    OutputDirectory = "./coasters",
+    FileNamePattern = "coaster_{0:D3}.stl"
+};
+
+var result = processor.GenerateSet(settings, count: 6, config);
+Console.WriteLine($"Generated {result.SuccessCount} coasters");
+```
+
+## Supported Printers
+
+| Printer | Build Volume | AMS Slots | High Speed |
+|---------|-------------|-----------|------------|
+| X1 Carbon | 256×256×256mm | 16 | ✓ |
+| X1E | 256×256×256mm | 16 | ✓ |
+| P1P | 256×256×256mm | 4 | ✓ |
+| P1S | 256×256×256mm | 4 | ✓ |
+| A1 | 256×256×256mm | 4 | ✓ |
+| A1 mini | 180×180×180mm | 4 | ✓ |
+
+## Material Presets
+
+| Material | Density | Food Safe | Heat Resistant |
+|----------|---------|-----------|----------------|
+| PLA | 1.24 g/cm³ | No | No |
+| PETG | 1.27 g/cm³ | Yes | Yes |
+| TPU | 1.21 g/cm³ | No | No |
+| ABS | 1.04 g/cm³ | No | Yes |
+| ASA | 1.07 g/cm³ | No | Yes |
+| Wood PLA | 1.15 g/cm³ | No | No |
+| Silk PLA | 1.24 g/cm³ | No | No |
+
 ## Project Structure
-- **CoaSTL.Core**: Core library with mesh generation, image processing, and STL export
+- **CoaSTL.Core**: Core library with mesh generation, image processing, and STL/3MF export
 - **CoaSTL.Cli**: Command-line interface for generating coasters
-- **CoaSTL.Tests**: Unit tests
+- **CoaSTL.Tests**: 69 unit tests covering all components
 
 ---
 
